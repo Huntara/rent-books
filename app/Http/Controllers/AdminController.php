@@ -19,7 +19,48 @@ class AdminController extends Controller
 
     public function users()
     {
-        return view('admin.user');
+        $users = User::where('roles_id', 2)->where('status', 'active')->get();
+        return view('admin.user', ['users' => $users]);
+    }
+
+    public function usersRegistered()
+    {
+        $usersRegistered = User::where('roles_id', 2)->where('status', 'inactive')->get();
+        return view('admin.user-registered', ['usersRegistered' => $usersRegistered]);
+    }
+
+    public function usersApprove($slug)
+    {
+        $users = User::where('slug', $slug)->first();
+        $users->status = 'active';
+        $users->save();
+        return redirect('users-detail/'.$slug)->with('status', 'User Approved Successfully');
+    }
+
+    public function usersDetail($slug)
+    {
+        $users = User::where('slug', $slug)->first();
+        return view('admin.user-detail', ['user' => $users]);
+    }
+
+    public function usersBan($slug)
+    {
+        $users = User::where('slug', $slug)->first();
+        $users->delete();
+        return redirect('users')->with('status', 'User Deleted Successfully');
+    }
+
+    public function usersBanned()
+    {
+        $usersBanned = User::onlyTrashed()->get();
+        return view('admin.user-banned', ['usersBanned' => $usersBanned]);
+    }
+
+    public function usersRestore($slug)
+    {
+        $users = User::withTrashed()->where('slug', $slug)->first();
+        $users->restore();
+        return redirect('users')->with('status', 'User Restored Successfully');
     }
 
     public function category()
@@ -55,13 +96,43 @@ class AdminController extends Controller
         }
 
         $request['cover'] = $newName;
-        
         $book = Book::create($request->all());
-        $book->categories()->sync($request->categories);
+        $book->categories()->sync($request->categories);    
         return redirect('books')->with('status', 'Book Added Successfully');
     }
 
-    public function rentlog()
+    public function booksEdit($slug)
+    {
+        $books = Book::where('slug', $slug)->first();
+        $categories = Category::all();
+        return view('admin.edit-book', ['books' => $books, 'categories' => $categories]);
+    }
+
+    public function booksUpdate(Request $request, $slug)
+    {
+        if($request->file('image')){
+            $extension = $request->file('image')->getClientOriginalExtension();
+            $newName = $request->title.'-'.now()->timestamp.'.'.$extension;
+            $request->file('image')->storeAs('cover', $newName);
+            $request['cover'] = $newName;
+        }
+
+        $books = Book::where('slug', $slug)->first();
+        $books->update($request->all());
+        if($request->categories){
+            $books->categories()->sync($request->categories);
+        }
+        return redirect('books')->with('status', 'Book Update Successfully');
+    }
+
+    public function booksDestroy($slug)
+    {
+        $books = Book::where('slug', $slug)->first();
+        $books->delete();
+        return redirect('books')->with('status', 'Books Deleted Successfully');
+    }
+
+    public function rentlog()   
     {
         return view('admin.rentlog');
     }

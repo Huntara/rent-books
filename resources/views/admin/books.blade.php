@@ -17,6 +17,7 @@
                 <th>Book Code</th>
                 <th>Title</th>
                 <th>Cover</th>
+                <th>Category</th>
                 <th>Status</th>
                 <th>Action</th>
             </thead>
@@ -26,11 +27,21 @@
                       <td>{{$loop->iteration}}</td>  
                       <td>{{$value->book_code}}</td>
                       <td>{{$value->title}}</td>
-                      <td>{{$value->cover}}</td>
+                      <td>
+                        @if($value->cover != '')
+                        <img src="{{asset('storage/cover/'.$value->cover)}}" alt="" width="65px"></td>
+                        @else
+                        <img src="{{asset('img/not-found.jpg')}}" alt="" width="65px">
+                        @endif
+                      <td>
+                            @foreach($value->categories as $category)
+                                {{$category->name}} <br>
+                            @endforeach
+                      </td>
                       <td>{{$value->status}}</td>
                       <td>
-                        <a href="" class="btn btn-primary">Edit</a>
-                        <a href="" class="btn btn-danger">Delete</a>
+                        <a href="/books-edit/{{$value->slug}}" class="btn btn-primary">Edit</a>
+                        <a href="/books-delete/{{$value->slug}}" class="btn btn-danger">Delete</a>
                       </td>
                     </tr>
                 @endforeach

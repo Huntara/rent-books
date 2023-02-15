@@ -14,7 +14,7 @@
     <label for="image" class="form-label">Cover</label>
     <input type="file" name="image" id="image" class="form-control w-50">
     <label for="categories[]" class="form-label">Category</label>
-    <select class="form-control select" name="categories" id="categories" multiple="multiple">
+    <select class="form-control select" name="categories[]" id="categories" multiple="multiple">
         @foreach($categories as $item)
         <option value="{{$item->id}}">{{$item->name}}</option>
         @endforeach
